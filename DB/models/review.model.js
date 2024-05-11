@@ -1,7 +1,11 @@
 import { Schema, model } from "mongoose";
 
-const courseSchema = new Schema(
+const reviewSchema = new Schema(
   {
+    comment: {
+      type: String,
+      required: true,
+    },
     rating: {
       type: Number,
       required: true,
@@ -32,3 +36,7 @@ const courseSchema = new Schema(
     timestamps: true,
   }
 );
+
+const reviewModel = model('Review', reviewSchema)
+
+export default reviewModel

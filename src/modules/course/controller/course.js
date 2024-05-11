@@ -60,7 +60,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
     return next(new ErrorClass("Nothing To Update!", StatusCodes.BAD_REQUEST));
   }
 
-  res.status(StatusCodes.CREATED).json({ course });
+  res.status(StatusCodes.OK).json({ course });
 });
 
 export const deleteCourse = asyncHandler(async (req, res) => {
