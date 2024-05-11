@@ -13,6 +13,7 @@ courseRoute.get('/GetCoursesSuperAdmin',auth(userAuth.superAdmin),courseControll
 courseRoute.get('/GetCoursesStudent',auth(userAuth.student),courseController.getAllCourseForStudent)
 courseRoute.get('/SearchCoursesStudent',auth(userAuth.student),courseController.SearchForStudent)
 courseRoute.get('/SearchCoursesInstructor',auth(userAuth.instructor),courseController.SearchForInstructor)
+courseRoute.get('/InstructorCourses',auth(userAuth.instructor),courseController.getMyCourseForInstructor)
 
 
 export default courseRoute

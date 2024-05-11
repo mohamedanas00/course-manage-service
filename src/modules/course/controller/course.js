@@ -111,7 +111,6 @@ export const SearchForStudent = asyncHandler(async (req, res) => {
     });
 });
 
-
 export const SearchForInstructor = asyncHandler(async (req, res) => {
     let apiFeatures = new ApiFeatures(
         courseModel.find(), 
@@ -134,3 +133,11 @@ export const SearchForInstructor = asyncHandler(async (req, res) => {
         previous: apiFeatures.previous
     });
 });
+
+export const getMyCourseForInstructor = asyncHandler(
+  async (req, res) => {
+    const courses = await courseModel.find({
+      "instructor.id": req.user.id,});
+    res.status(StatusCodes.OK).json({ courses });
+  }
+);
