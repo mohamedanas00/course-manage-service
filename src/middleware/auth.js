@@ -7,7 +7,8 @@ import { verifyToken } from "../utils/VerifyToken.js";
 export const userAuth = {
     student: ['student'],
     instructor:['instructor'],
-    admin:['admin']
+    admin:['admin'],
+    superAdmin:['admin','instructor']
 }
 
 Object.freeze(userAuth)

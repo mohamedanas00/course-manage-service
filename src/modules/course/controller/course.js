@@ -1,6 +1,7 @@
 import { asyncHandler } from "../../../utils/errorHandling.js";
 import courseModel from "../../../../DB/models/course.model.js";
 import { StatusCodes } from "http-status-codes";
+import { ApiFeatures } from "../../../utils/apiFeature.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const { name, duration, category, capacity } = req.body;
@@ -73,4 +74,63 @@ export const deleteCourse = asyncHandler(async (req, res) => {
   }
 
   res.status(StatusCodes.OK).json({ message: "Course deleted successfully" });
+});
+
+export const getAllCourseForAdminAndInstructor = asyncHandler(
+  async (req, res) => {
+    const courses = await courseModel.find();
+    res.status(StatusCodes.OK).json({ courses });
+  }
+);
+
+export const getAllCourseForStudent = asyncHandler(async (req, res) => {
+  const courses = await courseModel.find({ isPublished: false });
+  res.status(StatusCodes.OK).json({ courses });
+});
+
+export const SearchForStudent = asyncHandler(async (req, res) => {
+    let apiFeatures = new ApiFeatures(
+        courseModel.find({ courses }), 
+        req.query
+    )
+        .fields()
+        .pagination(courseModel)
+        .search()
+        .sort()
+        .filter();
+
+    let courses = await apiFeatures.mongooseQuery.exec();
+
+    res.status(StatusCodes.OK).json({
+        courses,
+        totalPages: apiFeatures.totalPages,
+        countDocuments: apiFeatures.countDocuments,
+        page: apiFeatures.page,
+        next: apiFeatures.next,
+        previous: apiFeatures.previous
+    });
+});
+
+
+export const SearchForInstructor = asyncHandler(async (req, res) => {
+    let apiFeatures = new ApiFeatures(
+        courseModel.find(), 
+        req.query
+    )
+        .fields()
+        .pagination(courseModel)
+        .search()
+        .sort()
+        .filter();
+
+    let courses = await apiFeatures.mongooseQuery.exec();
+
+    res.status(StatusCodes.OK).json({
+        courses,
+        totalPages: apiFeatures.totalPages,
+        countDocuments: apiFeatures.countDocuments,
+        page: apiFeatures.page,
+        next: apiFeatures.next,
+        previous: apiFeatures.previous
+    });
 });
