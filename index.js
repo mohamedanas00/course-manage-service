@@ -1,16 +1,15 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import jwt from "jsonwebtoken";
 import { verifyToken } from "./src/utils/VerifyToken.js";
 import initApp from "./src/index.routes.js";
 const app = express();
 dotenv.config();
 // Verify token asynchronously
 const decode = verifyToken(
-  "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYWRtaW4iLCJpZCI6NSwiZXhwIjoxNzQ2ODkwODAxfQ.jZhBWLihTUT7PAA7Az1RfaoZe-077x1oF_mdbrCClM0"
+  "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYWRtaW4iLCJuYW1lIjoiSGFzc2FuIiwiaWQiOjUsImVtYWlsIjoiaGFzc2FuMDA3QGdtYWlsLmNvbSIsImV4cCI6MTc0NjkxMTA2NH0.9FPffo-1Y8jf-HMJDissz5p4wgZDUmmJRz3yGcZOUYs"
 );
-console.log("Decoded Token:", decode);
+console.log("Decoded Token:", decode.role,decode.id);
 initApp(app, express);
 
 
