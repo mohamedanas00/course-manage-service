@@ -2,6 +2,7 @@ import { asyncHandler } from "../../../utils/errorHandling.js";
 import courseModel from "../../../../DB/models/course.model.js";
 import { StatusCodes } from "http-status-codes";
 import { ApiFeatures } from "../../../utils/apiFeature.js";
+import logsModel from "../../../../DB/models/logs.model.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const { name, duration, category, capacity } = req.body;
@@ -12,7 +13,6 @@ export const createCourse = asyncHandler(async (req, res) => {
     name,
     "instructor.id": instructor.id,
   });
-  console.log(existingCourse);
   if (existingCourse) {
     return res
       .status(StatusCodes.BAD_REQUEST)
@@ -29,13 +29,19 @@ export const createCourse = asyncHandler(async (req, res) => {
       email: instructor.email,
     },
   });
+  await logsModel.create({
+    userId: instructor.id,
+    email: instructor.email,
+    role: instructor.role,
+    action: `Create course successfully with id ${course._id}`,
+  });
   res.status(StatusCodes.CREATED).json({ course });
 });
 
 export const updateCourse = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, duration, category, capacity, isPublished } = req.body;
-  const course = await courseModel.findById(id);
+  const admin = req.user;
   if (!course) {
     return next(new ErrorClass("Comment is Not Exist!", StatusCodes.NOT_FOUND));
   }
@@ -89,55 +95,48 @@ export const getAllCourseForStudent = asyncHandler(async (req, res) => {
 });
 
 export const SearchForStudent = asyncHandler(async (req, res) => {
-    let apiFeatures = new ApiFeatures(
-        courseModel.find({ courses }), 
-        req.query
-    )
-        .fields()
-        .pagination(courseModel)
-        .search()
-        .sort()
-        .filter();
+  let apiFeatures = new ApiFeatures(courseModel.find({ courses }), req.query)
+    .fields()
+    .pagination(courseModel)
+    .search()
+    .sort()
+    .filter();
 
-    let courses = await apiFeatures.mongooseQuery.exec();
+  let courses = await apiFeatures.mongooseQuery.exec();
 
-    res.status(StatusCodes.OK).json({
-        courses,
-        totalPages: apiFeatures.totalPages,
-        countDocuments: apiFeatures.countDocuments,
-        page: apiFeatures.page,
-        next: apiFeatures.next,
-        previous: apiFeatures.previous
-    });
+  res.status(StatusCodes.OK).json({
+    courses,
+    totalPages: apiFeatures.totalPages,
+    countDocuments: apiFeatures.countDocuments,
+    page: apiFeatures.page,
+    next: apiFeatures.next,
+    previous: apiFeatures.previous,
+  });
 });
 
 export const SearchForInstructor = asyncHandler(async (req, res) => {
-    let apiFeatures = new ApiFeatures(
-        courseModel.find(), 
-        req.query
-    )
-        .fields()
-        .pagination(courseModel)
-        .search()
-        .sort()
-        .filter();
+  let apiFeatures = new ApiFeatures(courseModel.find(), req.query)
+    .fields()
+    .pagination(courseModel)
+    .search()
+    .sort()
+    .filter();
 
-    let courses = await apiFeatures.mongooseQuery.exec();
+  let courses = await apiFeatures.mongooseQuery.exec();
 
-    res.status(StatusCodes.OK).json({
-        courses,
-        totalPages: apiFeatures.totalPages,
-        countDocuments: apiFeatures.countDocuments,
-        page: apiFeatures.page,
-        next: apiFeatures.next,
-        previous: apiFeatures.previous
-    });
+  res.status(StatusCodes.OK).json({
+    courses,
+    totalPages: apiFeatures.totalPages,
+    countDocuments: apiFeatures.countDocuments,
+    page: apiFeatures.page,
+    next: apiFeatures.next,
+    previous: apiFeatures.previous,
+  });
 });
 
-export const getMyCourseForInstructor = asyncHandler(
-  async (req, res) => {
-    const courses = await courseModel.find({
-      "instructor.id": req.user.id,});
-    res.status(StatusCodes.OK).json({ courses });
-  }
-);
+export const getMyCourseForInstructor = asyncHandler(async (req, res) => {
+  const courses = await courseModel.find({
+    "instructor.id": req.user.id,
+  });
+  res.status(StatusCodes.OK).json({ courses });
+});
