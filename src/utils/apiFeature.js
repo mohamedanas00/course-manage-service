@@ -10,7 +10,7 @@ export class ApiFeatures {
         let pageNumber = this.queryString.page * 1 || 1
         //if send -number 
         if (this.queryString.page <= 0) pageNumber = 1
-        let limit = 50
+        let limit = 100
         let skip = (pageNumber - 1) * limit
         this.page = pageNumber
         this.mongooseQuery.skip(skip).limit(limit)

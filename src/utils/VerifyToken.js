@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 
 // Define your secret key as a byte array
 const SECRET_KEY_BYTES = Buffer.from([

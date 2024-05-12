@@ -95,9 +95,12 @@ export const getAllCourseForStudent = asyncHandler(async (req, res) => {
 });
 
 export const SearchForStudent = asyncHandler(async (req, res) => {
-  let apiFeatures = new ApiFeatures(courseModel.find({ courses }), req.query)
+  let apiFeatures = new ApiFeatures(
+    courseModel.find({ isPublished: false }),
+    req.query
+  )
     .fields()
-    .pagination(courseModel)
+    .pagination(courseModel.find({ isPublished: false }))
     .search()
     .sort()
     .filter();
@@ -106,11 +109,7 @@ export const SearchForStudent = asyncHandler(async (req, res) => {
 
   res.status(StatusCodes.OK).json({
     courses,
-    totalPages: apiFeatures.totalPages,
     countDocuments: apiFeatures.countDocuments,
-    page: apiFeatures.page,
-    next: apiFeatures.next,
-    previous: apiFeatures.previous,
   });
 });
 
@@ -126,11 +125,7 @@ export const SearchForInstructor = asyncHandler(async (req, res) => {
 
   res.status(StatusCodes.OK).json({
     courses,
-    totalPages: apiFeatures.totalPages,
     countDocuments: apiFeatures.countDocuments,
-    page: apiFeatures.page,
-    next: apiFeatures.next,
-    previous: apiFeatures.previous,
   });
 });
 
