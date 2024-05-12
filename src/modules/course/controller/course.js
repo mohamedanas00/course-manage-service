@@ -16,7 +16,7 @@ export const createCourse = asyncHandler(async (req, res) => {
   if (existingCourse) {
     return res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ error: "You already have a course with this name" });
+      .json({ message: "You already have a course with this name" });
   }
   const course = await courseModel.create({
     name,
@@ -39,9 +39,7 @@ export const createCourse = asyncHandler(async (req, res) => {
 });
 
 export const updateCourse = asyncHandler(async (req, res) => {
-  const { id } = req.params;
   const { name, duration, category, capacity, isPublished } = req.body;
-  const admin = req.user;
   if (!course) {
     return next(new ErrorClass("Comment is Not Exist!", StatusCodes.NOT_FOUND));
   }
@@ -76,7 +74,7 @@ export const deleteCourse = asyncHandler(async (req, res) => {
   if (!course) {
     return res
       .status(StatusCodes.NOT_FOUND)
-      .json({ error: "Course does not exist" });
+      .json({ message: "Course does not exist" });
   }
 
   res.status(StatusCodes.OK).json({ message: "Course deleted successfully" });
