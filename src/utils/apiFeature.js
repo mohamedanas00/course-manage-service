@@ -42,21 +42,15 @@ export class ApiFeatures {
         this.mongooseQuery.find(filterObj)
         return this
     }
-
+    
     sort() {
-        // 3-sort
         if (this.queryString.sort) {
-            const sortFields = this.queryString.sort.split(',').map(field => {
-                if (field.startsWith('+')) {
-                    return [field.substring(1), -1];
-                } else {
-                    return [field, 1];
-                }
-            });
-            this.mongooseQuery.sort(sortFields);
+            let sortBy = this.queryString.sort.split(',').join(' ')
+            this.mongooseQuery.sort(sortBy)
         }
-        return this;
+        return this
     }
+    
     
 
     search() {
