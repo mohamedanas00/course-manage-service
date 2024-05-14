@@ -1,47 +1,58 @@
 import { StatusCodes } from "http-status-codes";
 import reviewModel from "../../../../DB/models/review.model.js";
 import { asyncHandler } from "../../../utils/errorHandling.js";
+import { checkEnrollment } from "../../../utils/enrollmentAPIs.js";
+import courseModel from "../../../../DB/models/course.model.js";
+import logsModel from "../../../../DB/models/logs.model.js";
 
-
-//*ToDO
+//*Calling microservice to check if the user is enrolled in the course
 export const createReview = asyncHandler(async (req, res) => {
-  const { comment, rating } = req.body;
-  const { id } = req.params;
+  const { courseId } = req.params;
   const student = req.user;
-  const isExistCourse = await courseModel.findById(id);
 
-  if (!isExistCourse) {
-    return res
-      .status(StatusCodes.NOT_FOUND)
-      .json({ message: "Course Not Found" });
-  }
-  const existingReview = await reviewModel.findOne({
-    courseId: id,
-    "student.id": student.id,
-  });
-
-  if (existingReview) {
+  const userId = student.id;
+  const result = await checkEnrollment(courseId, userId);
+  if (!result)
     return res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "You have already reviewed this course." });
-  }
+      .json({ message: "You are not enrolled in this course to make review!" });
+  const isReview = await reviewModel.findOne({
+    courseId,
+    "student.id": userId,
+  });
+  console.log(isReview);
+  if (isReview)
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "You have already reviewed this course!" });
   const review = await reviewModel.create({
-    comment,
-    rating,
-    courseId: id,
+    comment: req.body.comment,
+    rating: req.body.rating,
+    courseId,
     student: {
-      id: student.id,
+      id: userId,
       name: student.name,
       email: student.email,
     },
   });
+  const course = await courseModel.findById(courseId);
+  let oldRating = course.rating;
+  let newRating =
+    (oldRating * course.enrolledStudents + review.rating) /
+    course.enrolledStudents;
+  if (newRating > 5) {
+    newRating = 5;
+  }
+  course.rating = newRating;
 
-  const totalRatings = isExistCourse.rating * isExistCourse.enrolledStudents;
-  const newEnrolledStudents = isExistCourse.enrolledStudents + 1;
-  const newTotalRatings = totalRatings + rating;
-  const newRating = newTotalRatings / newEnrolledStudents;
+  await course.save();
 
-  isExistCourse.rating=newRating
-
+  await logsModel.create({
+    userId: student.id,
+    email: student.email,
+    role: student.role,
+    action: `Create review successfully with id ${review._id}`,
+  });
+  await review.save();
   res.status(StatusCodes.CREATED).json({ review });
 });

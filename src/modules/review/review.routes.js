@@ -4,6 +4,6 @@ import auth, { userAuth } from '../../middleware/auth.js';
 const reviewRoute = Router();
 
 
-reviewRoute.post('/CreateReview/:id',auth(userAuth.student),reviewController.createReview)
+reviewRoute.post('/CreateReview/:courseId',auth(userAuth.student),reviewController.createReview)
 
 export default reviewRoute
