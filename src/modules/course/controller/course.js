@@ -3,6 +3,7 @@ import courseModel from "../../../../DB/models/course.model.js";
 import { StatusCodes } from "http-status-codes";
 import { ApiFeatures } from "../../../utils/apiFeature.js";
 import logsModel from "../../../../DB/models/logs.model.js";
+import { deleteEnrollmentWithCircuitBreaker } from "../../../utils/deleteEnrolmentAPI.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const { name, duration, category, capacity } = req.body;
@@ -69,13 +70,18 @@ export const updateCourse = asyncHandler(async (req, res) => {
 
 export const deleteCourse = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const course = await courseModel.findByIdAndDelete(id);
-
+  const course = await courseModel.findById(id);
   if (!course) {
     return res
       .status(StatusCodes.NOT_FOUND)
       .json({ message: "Course does not exist" });
   }
+  const checking = await deleteEnrollmentWithCircuitBreaker(id);
+  console.log(checking);
+  if (checking !== true) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: checking });
+  }
+  await courseModel.deleteOne({ _id: id });
 
   res.status(StatusCodes.OK).json({ message: "Course deleted successfully" });
 });
@@ -134,20 +140,24 @@ export const getMyCourseForInstructor = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ courses });
 });
 
-export const CheckCategoryAndUpdateEnrollmentStudents= asyncHandler(async (req, res) => {
-  const { courseId } = req.params;
-  const course = await courseModel.findById(courseId);
-  console.log(course);
-  if(!course){
-    console.log("sssss");
-    return res.status(StatusCodes.NOT_FOUND).json({ message: "Course not found" });
+export const CheckCategoryAndUpdateEnrollmentStudents = asyncHandler(
+  async (req, res) => {
+    const { courseId } = req.params;
+    const course = await courseModel.findById(courseId);
+    console.log(course);
+    if (!course) {
+      console.log("sssss");
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Course not found" });
+    }
+    if (course.capacity <= course.enrolledStudents) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Course is full" });
+    }
+    course.enrolledStudents = course.enrolledStudents + 1;
+    await course.save();
+    res.status(StatusCodes.OK).json({ message: "Done" });
   }
-  if(course.capacity<=course.enrolledStudents){
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "Course is full" });
-  }
-  course.enrolledStudents = course.enrolledStudents + 1;
-  await course.save();
-  res.status(StatusCodes.OK).json({ message: "Done" });
-})
+);
