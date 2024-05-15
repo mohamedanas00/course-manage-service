@@ -43,7 +43,6 @@ export async function checkEnrollmentWithCircuitBreaker(courseId, userId) {
     if (failedRequestsCount >= failedRequestsThreshold) {
       breaker.open();
     }
-    console.error("Error calling checkEnrollment via CircuitBreaker:", error);
     return error.message;
   }
 }
