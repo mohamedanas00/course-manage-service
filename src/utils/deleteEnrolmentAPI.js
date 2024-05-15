@@ -43,6 +43,22 @@ export async function deleteEnrollmentWithCircuitBreaker(courseId) {
     if (failedRequestsCount >= failedRequestsThreshold) {
       breaker.open();
     }
+    // Handle error
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      console.log(error.response.status); // Status code
+      console.log(error.response.data); // Response data
+      return "error.response";
+
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.log(error.request);
+      return "Disconnected";
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log('Error', error.message);
+      return "error.message";
+    }
     return error.message;
   }
 }
