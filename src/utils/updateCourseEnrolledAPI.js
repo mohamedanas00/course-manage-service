@@ -5,13 +5,15 @@ import axios from "axios";
 async function UpdateEnrolledCourse(courseId, courseName) {
     try {
       console.log("checkEnrollment", courseId, courseName);
-      // Pass userId in the request body
-      const response = await axios.patch(
+      await axios.patch(
         `http://localhost:${process.env.ENROLLMENT_PORT}/enrollment/UpdateEnrolledCourse/${courseId}`,
         { name: courseName }
       );
-      // Assuming the response contains a status indicating enrollment status
-      return response.data.isEnrolled;
+      const result = {
+        status: 200,
+        message: "Done",
+      };
+      return result;
     } catch (error) {
       if (error.response) {
         return error.response.data.message;
@@ -48,6 +50,23 @@ export async function UpdateEnrolledCourseCircuitBreaker(courseId, courseName) {
     if (failedRequestsCount >= failedRequestsThreshold) {
       breaker.open();
     }
-    return error.message;
+    var Response = {};
+    if (error.response) {
+      //*The request was made and the server responded with a status code
+      Response.status = error.response.status;
+      Response.message = error.response.data;
+      return Response;
+    } else if (error.request) {
+      //*The request was made but no response was received
+      Response.status = 400;
+      Response.message = "Please try again";
+      return Response;
+    } else {
+      //*Circuit Opened
+      //*Something happened in setting up the request that triggered an Error
+      Response.status = 400;
+      Response.message = "Please try again 10 seconds later";
+      return Response;
+    }
   }
 }

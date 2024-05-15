@@ -49,10 +49,10 @@ export const updateCourse = asyncHandler(async (req, res) => {
   }
   if (name) {
     course.name = name.toLowerCase();
-    const check = await UpdateEnrolledCourseCircuitBreaker(id, name);
-    console.log(check);
-    if (check !== true) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: check });
+    const checking = await UpdateEnrolledCourseCircuitBreaker(id, name);
+    console.log(checking);
+    if (checking.status !== 200) {
+      return res.status(checking.status).json({ message: checking.message });
     }
   }
   if (duration) {
@@ -75,7 +75,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
 
   res.status(StatusCodes.OK).json({ course });
 });
-//checking
+
 export const deleteCourse = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const course = await courseModel.findById(id);
@@ -86,8 +86,8 @@ export const deleteCourse = asyncHandler(async (req, res) => {
   }
   const checking = await deleteEnrollmentWithCircuitBreaker(id);
   console.log(checking);
-  if (checking !== true) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: checking });
+  if (checking.status !== 200) {
+    return res.status(checking.status).json({ message: checking.message });
   }
   await courseModel.deleteOne({ _id: id });
 

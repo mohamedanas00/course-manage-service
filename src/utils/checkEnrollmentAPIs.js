@@ -7,7 +7,11 @@ async function checkEnrollment(courseId, userId) {
     await axios.get(
       `http://localhost:${process.env.ENROLLMENT_PORT}/enrollment/CheckIsEnrolled/${courseId}?userId=${userId}`
     );
-    return true;
+    const result ={
+      status: 200,
+      message: "Done",
+    }
+    return result;
   } catch (error) {
     if (error.response) {
       return error.response.data.message;
@@ -43,6 +47,24 @@ export async function checkEnrollmentWithCircuitBreaker(courseId, userId) {
     if (failedRequestsCount >= failedRequestsThreshold) {
       breaker.open();
     }
-    return error.message;
+    var Response ={};
+    if (error.response) {
+      //*The request was made and the server responded with a status code
+      Response.status = error.response.status;
+      Response.message = error.response.data;
+      return Response;
+
+    } else if (error.request) {
+      //*The request was made but no response was received
+      Response.status = 400;
+      Response.message = "Please try again";
+      return Response;
+    } else {
+      //*Circuit Opened
+      // Something happened in setting up the request that triggered an Error
+      Response.status = 400;
+      Response.message = "Please try again 10 seconds later";
+      return Response;
+    }
   }
 }

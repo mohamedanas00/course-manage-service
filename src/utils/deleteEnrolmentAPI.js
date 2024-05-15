@@ -7,7 +7,11 @@ async function deleteEnrollment(courseId) {
     await axios.delete(
       `http://localhost:${process.env.ENROLLMENT_PORT}/enrollment/DeleteEnroll/${courseId}`
     );
-    return true;
+    const result = {
+      status: 200,
+      message: "Done",
+    };
+    return result;
   } catch (error) {
     if (error.response) {
       return error.response.data.message;
@@ -43,22 +47,23 @@ export async function deleteEnrollmentWithCircuitBreaker(courseId) {
     if (failedRequestsCount >= failedRequestsThreshold) {
       breaker.open();
     }
-    // Handle error
+    var Response = {};
     if (error.response) {
-      // The request was made and the server responded with a status code
-      console.log(error.response.status); // Status code
-      console.log(error.response.data); // Response data
-      return "error.response";
-
+      //*The request was made and the server responded with a status code
+      Response.status = error.response.status;
+      Response.message = error.response.data;
+      return Response;
     } else if (error.request) {
-      // The request was made but no response was received
-      console.log(error.request);
-      return "Disconnected";
+      //*The request was made but no response was received
+      Response.status = 400;
+      Response.message = "Please try again";
+      return Response;
     } else {
-      // Something happened in setting up the request that triggered an Error
-      console.log('Error', error.message);
-      return "error.message";
+      //*Circuit Opened
+      //*Something happened in setting up the request that triggered an Error
+      Response.status = 400;
+      Response.message = "Please try again 10 seconds later";
+      return Response;
     }
-    return error.message;
   }
 }

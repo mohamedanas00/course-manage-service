@@ -19,12 +19,10 @@ export const createReview = asyncHandler(async (req, res) => {
       .status(StatusCodes.BAD_REQUEST)
       .json({ message: "You have already reviewed this course!" });
 
-  const result = await checkEnrollmentWithCircuitBreaker(courseId, userId);
-  console.log(result);
-  if (result !== true) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: result });
+  const checking = await checkEnrollmentWithCircuitBreaker(courseId, userId);
+  console.log(checking);
+  if (checking.status !== 200) {
+    return res.status(checking.status).json({ message: checking.message });
   }
 
   const review = await reviewModel.create({
