@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { ApiFeatures } from "../../../utils/apiFeature.js";
 import logsModel from "../../../../DB/models/logs.model.js";
 import { deleteEnrollmentWithCircuitBreaker } from "../../../utils/deleteEnrolmentAPI.js";
+import { UpdateEnrolledCourseCircuitBreaker } from "../../../utils/updateCourseEnrolledAPI.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const { name, duration, category, capacity } = req.body;
@@ -41,11 +42,18 @@ export const createCourse = asyncHandler(async (req, res) => {
 
 export const updateCourse = asyncHandler(async (req, res) => {
   const { name, duration, category, capacity, isPublished } = req.body;
+  const { id } = req.params;
+  const course = await courseModel.findById(id);
   if (!course) {
     return next(new ErrorClass("Comment is Not Exist!", StatusCodes.NOT_FOUND));
   }
   if (name) {
     course.name = name.toLowerCase();
+    const check = await UpdateEnrolledCourseCircuitBreaker(id, name);
+    console.log(check);
+    if (check !== true) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: check });
+    }
   }
   if (duration) {
     course.duration = duration;
@@ -139,7 +147,7 @@ export const getMyCourseForInstructor = asyncHandler(async (req, res) => {
   });
   res.status(StatusCodes.OK).json({ courses });
 });
-
+//?using in another microservice 
 export const CheckCategoryAndUpdateEnrollmentStudents = asyncHandler(
   async (req, res) => {
     const { courseId } = req.params;
