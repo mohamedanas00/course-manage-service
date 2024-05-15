@@ -75,7 +75,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
 
   res.status(StatusCodes.OK).json({ course });
 });
-
+//checking
 export const deleteCourse = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const course = await courseModel.findById(id);
