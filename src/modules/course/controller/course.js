@@ -133,3 +133,21 @@ export const getMyCourseForInstructor = asyncHandler(async (req, res) => {
   });
   res.status(StatusCodes.OK).json({ courses });
 });
+
+export const CheckCategoryAndUpdateEnrollmentStudents= asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const course = await courseModel.findById(courseId);
+  console.log(course);
+  if(!course){
+    console.log("sssss");
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "Course not found" });
+  }
+  if(course.capacity<=course.enrolledStudents){
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Course is full" });
+  }
+  course.enrolledStudents = course.enrolledStudents + 1;
+  await course.save();
+  res.status(StatusCodes.OK).json({ message: "Done" });
+})

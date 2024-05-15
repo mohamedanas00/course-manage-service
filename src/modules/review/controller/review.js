@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import reviewModel from "../../../../DB/models/review.model.js";
 import { asyncHandler } from "../../../utils/errorHandling.js";
-import { checkEnrollment } from "../../../utils/enrollmentAPIs.js";
+import { checkEnrollmentWithCircuitBreaker } from "../../../utils/checkEnrollmentAPIs.js";
 import courseModel from "../../../../DB/models/course.model.js";
 import logsModel from "../../../../DB/models/logs.model.js";
 
@@ -9,22 +9,24 @@ import logsModel from "../../../../DB/models/logs.model.js";
 export const createReview = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const student = req.user;
-
   const userId = student.id;
-  const result = await checkEnrollment(courseId, userId);
-  if (!result)
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "You are not enrolled in this course to make review!" });
   const isReview = await reviewModel.findOne({
     courseId,
     "student.id": userId,
   });
-  console.log(isReview);
   if (isReview)
     return res
       .status(StatusCodes.BAD_REQUEST)
       .json({ message: "You have already reviewed this course!" });
+
+  const result = await checkEnrollmentWithCircuitBreaker(courseId, userId);
+  console.log(result);
+  if (result !== true) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: result });
+  }
+
   const review = await reviewModel.create({
     comment: req.body.comment,
     rating: req.body.rating,
@@ -56,3 +58,5 @@ export const createReview = asyncHandler(async (req, res) => {
   await review.save();
   res.status(StatusCodes.CREATED).json({ review });
 });
+
+ 
