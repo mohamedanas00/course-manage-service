@@ -169,3 +169,11 @@ export const CheckCategoryAndUpdateEnrollmentStudents = asyncHandler(
     res.status(StatusCodes.OK).json({ message: "Done" });
   }
 );
+//?using in another microservice 
+export const DeleteInstructorCourses= asyncHandler(async (req, res) => {
+  const { instructorId } = req.params;
+  const courses = await courseModel.deleteMany({
+    "instructor.id": instructorId,
+  });
+  res.status(StatusCodes.OK).json({ courses });
+})

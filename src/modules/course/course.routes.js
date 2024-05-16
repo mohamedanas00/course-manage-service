@@ -11,8 +11,9 @@ courseRoute.put('/UpdateCourse/:id',auth(userAuth.admin),courseController.update
 courseRoute.get('/GetCoursesSuperAdmin',auth(userAuth.superAdmin),courseController.getAllCourseForAdminAndInstructor)
 courseRoute.get('/GetCoursesStudent',auth(userAuth.student),courseController.getAllCourseForStudent)
 courseRoute.get('/SearchCoursesStudent',auth(userAuth.student),courseController.SearchForStudent)
-courseRoute.get('/SearchCoursesInstructor',auth(userAuth.instructor),courseController.SearchForInstructor)
+courseRoute.get('/SearchCoursesInstructor',auth(userAuth.superAdmin),courseController.SearchForInstructor)
 courseRoute.get('/InstructorCourses',auth(userAuth.instructor),courseController.getMyCourseForInstructor)
 courseRoute.patch('/UpdateEnrollCourse/:courseId',courseController.CheckCategoryAndUpdateEnrollmentStudents)
+courseRoute.delete('/DeleteInstructorCourses/:instructorId',courseController.DeleteInstructorCourses)
 
 export default courseRoute

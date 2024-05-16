@@ -57,4 +57,11 @@ export const createReview = asyncHandler(async (req, res) => {
   res.status(StatusCodes.CREATED).json({ review });
 });
 
+export const getCourseReviews = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const reviews = await reviewModel
+    .find({ courseId })
+    .populate("student", "name email");
+  res.status(StatusCodes.OK).json({ reviews });
+});
  

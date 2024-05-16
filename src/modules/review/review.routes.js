@@ -5,5 +5,6 @@ const reviewRoute = Router();
 
 
 reviewRoute.post('/CreateReview/:courseId',auth(userAuth.student),reviewController.createReview)
+reviewRoute.get('/GetCourseReviews/:courseId',auth(userAuth.admin),reviewController.getCourseReviews)
 
 export default reviewRoute
