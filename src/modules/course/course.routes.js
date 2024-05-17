@@ -17,3 +17,4 @@ courseRoute.patch('/UpdateEnrollCourse/:courseId',courseController.CheckCategory
 courseRoute.delete('/DeleteInstructorCourses/:instructorId',courseController.DeleteInstructorCourses)
 
 export default courseRoute
+//localhost:3000/course/DeleteInstructorCourses/:instructorId

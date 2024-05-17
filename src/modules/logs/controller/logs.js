@@ -4,7 +4,7 @@ import { asyncHandler } from "../../../utils/errorHandling.js";
 
 
 
-export const ViewAllLogs = asyncHandler(async (req, res) => {
+export const ViewAllLogs = asyncHandler(async (req, res,next) => {
     const logs = await logsModel.find();
     res.status(StatusCodes.OK).json({ logs });
 })

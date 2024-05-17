@@ -21,6 +21,9 @@ export const createReview = asyncHandler(async (req, res) => {
 
   const checking = await checkEnrollmentWithCircuitBreaker(courseId, userId);
   console.log(checking);
+  if(checking == "Not enrolled"){
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: checking });
+  }
   if (checking.status !== 200) {
     return res.status(checking.status).json({ message: checking.message });
   }
@@ -57,7 +60,7 @@ export const createReview = asyncHandler(async (req, res) => {
   res.status(StatusCodes.CREATED).json({ review });
 });
 
-export const getCourseReviews = asyncHandler(async (req, res) => {
+export const getCourseReviews = asyncHandler(async (req, res,next) => {
   const { courseId } = req.params;
   const reviews = await reviewModel
     .find({ courseId })

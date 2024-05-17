@@ -5,8 +5,9 @@ import { ApiFeatures } from "../../../utils/apiFeature.js";
 import logsModel from "../../../../DB/models/logs.model.js";
 import { deleteEnrollmentWithCircuitBreaker } from "../../../utils/deleteEnrolmentAPI.js";
 import { UpdateEnrolledCourseCircuitBreaker } from "../../../utils/updateCourseEnrolledAPI.js";
+import { ErrorClass } from "../../../utils/errorClass.js";
 
-export const createCourse = asyncHandler(async (req, res) => {
+export const createCourse = asyncHandler(async (req, res,next) => {
   const { name, duration, category, capacity } = req.body;
   const instructor = req.user;
 
@@ -40,12 +41,12 @@ export const createCourse = asyncHandler(async (req, res) => {
   res.status(StatusCodes.CREATED).json({ course });
 });
 
-export const updateCourse = asyncHandler(async (req, res) => {
+export const updateCourse = asyncHandler(async (req, res,next) => {
   const { name, duration, category, capacity, isPublished } = req.body;
   const { id } = req.params;
   const course = await courseModel.findById(id);
   if (!course) {
-    return next(new ErrorClass("Comment is Not Exist!", StatusCodes.NOT_FOUND));
+    return next(new ErrorClass("course is Not Exist!", StatusCodes.NOT_FOUND));
   }
   if (name) {
     course.name = name.toLowerCase();
@@ -76,7 +77,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ course });
 });
 
-export const deleteCourse = asyncHandler(async (req, res) => {
+export const deleteCourse = asyncHandler(async (req, res,next) => {
   const { id } = req.params;
   const course = await courseModel.findById(id);
   if (!course) {
@@ -101,12 +102,12 @@ export const getAllCourseForAdminAndInstructor = asyncHandler(
   }
 );
 
-export const getAllCourseForStudent = asyncHandler(async (req, res) => {
+export const getAllCourseForStudent = asyncHandler(async (req, res,next) => {
   const courses = await courseModel.find({ isPublished: false });
   res.status(StatusCodes.OK).json({ courses });
 });
 
-export const SearchForStudent = asyncHandler(async (req, res) => {
+export const SearchForStudent = asyncHandler(async (req, res,next) => {
   let apiFeatures = new ApiFeatures(
     courseModel.find({ isPublished: false }),
     req.query
@@ -125,7 +126,7 @@ export const SearchForStudent = asyncHandler(async (req, res) => {
   });
 });
 
-export const SearchForInstructor = asyncHandler(async (req, res) => {
+export const SearchForInstructor = asyncHandler(async (req, res,next) => {
   let apiFeatures = new ApiFeatures(courseModel.find(), req.query)
     .fields()
     .pagination(courseModel)
@@ -141,7 +142,7 @@ export const SearchForInstructor = asyncHandler(async (req, res) => {
   });
 });
 
-export const getMyCourseForInstructor = asyncHandler(async (req, res) => {
+export const getMyCourseForInstructor = asyncHandler(async (req, res,next) => {
   const courses = await courseModel.find({
     "instructor.id": req.user.id,
   });
@@ -170,7 +171,7 @@ export const CheckCategoryAndUpdateEnrollmentStudents = asyncHandler(
   }
 );
 //?using in another microservice 
-export const DeleteInstructorCourses= asyncHandler(async (req, res) => {
+export const DeleteInstructorCourses= asyncHandler(async (req, res,next) => {
   const { instructorId } = req.params;
   const courses = await courseModel.deleteMany({
     "instructor.id": instructorId,
