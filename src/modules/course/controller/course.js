@@ -7,7 +7,7 @@ import { deleteEnrollmentWithCircuitBreaker } from "../../../utils/deleteEnrolme
 import { UpdateEnrolledCourseCircuitBreaker } from "../../../utils/updateCourseEnrolledAPI.js";
 import { ErrorClass } from "../../../utils/errorClass.js";
 
-export const createCourse = asyncHandler(async (req, res,next) => {
+export const createCourse = asyncHandler(async (req, res, next) => {
   const { name, duration, category, capacity } = req.body;
   const instructor = req.user;
 
@@ -41,7 +41,7 @@ export const createCourse = asyncHandler(async (req, res,next) => {
   res.status(StatusCodes.CREATED).json({ course });
 });
 
-export const updateCourse = asyncHandler(async (req, res,next) => {
+export const updateCourse = asyncHandler(async (req, res, next) => {
   const { name, duration, category, capacity, isPublished } = req.body;
   const { id } = req.params;
   const course = await courseModel.findById(id);
@@ -77,7 +77,7 @@ export const updateCourse = asyncHandler(async (req, res,next) => {
   res.status(StatusCodes.OK).json({ course });
 });
 
-export const deleteCourse = asyncHandler(async (req, res,next) => {
+export const deleteCourse = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const course = await courseModel.findById(id);
   if (!course) {
@@ -102,12 +102,12 @@ export const getAllCourseForAdminAndInstructor = asyncHandler(
   }
 );
 
-export const getAllCourseForStudent = asyncHandler(async (req, res,next) => {
-  const courses = await courseModel.find({ isPublished: false });
+export const getAllCourseForStudent = asyncHandler(async (req, res, next) => {
+  const courses = await courseModel.find({ isPublished: true });
   res.status(StatusCodes.OK).json({ courses });
 });
 
-export const SearchForStudent = asyncHandler(async (req, res,next) => {
+export const SearchForStudent = asyncHandler(async (req, res, next) => {
   let apiFeatures = new ApiFeatures(
     courseModel.find({ isPublished: false }),
     req.query
@@ -126,7 +126,7 @@ export const SearchForStudent = asyncHandler(async (req, res,next) => {
   });
 });
 
-export const SearchForInstructor = asyncHandler(async (req, res,next) => {
+export const SearchForInstructor = asyncHandler(async (req, res, next) => {
   let apiFeatures = new ApiFeatures(courseModel.find(), req.query)
     .fields()
     .pagination(courseModel)
@@ -142,13 +142,13 @@ export const SearchForInstructor = asyncHandler(async (req, res,next) => {
   });
 });
 
-export const getMyCourseForInstructor = asyncHandler(async (req, res,next) => {
+export const getMyCourseForInstructor = asyncHandler(async (req, res, next) => {
   const courses = await courseModel.find({
     "instructor.id": req.user.id,
   });
   res.status(StatusCodes.OK).json({ courses });
 });
-//?using in another microservice 
+//?using in another microservice
 export const CheckCategoryAndUpdateEnrollmentStudents = asyncHandler(
   async (req, res) => {
     const { courseId } = req.params;
@@ -170,11 +170,11 @@ export const CheckCategoryAndUpdateEnrollmentStudents = asyncHandler(
     res.status(StatusCodes.OK).json({ message: "Done" });
   }
 );
-//?using in another microservice 
-export const DeleteInstructorCourses= asyncHandler(async (req, res,next) => {
+//?using in another microservice
+export const DeleteInstructorCourses = asyncHandler(async (req, res, next) => {
   const { instructorId } = req.params;
   const courses = await courseModel.deleteMany({
     "instructor.id": instructorId,
   });
   res.status(StatusCodes.OK).json({ courses });
-})
+});
