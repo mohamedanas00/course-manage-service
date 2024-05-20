@@ -109,11 +109,11 @@ export const getAllCourseForStudent = asyncHandler(async (req, res, next) => {
 
 export const SearchForStudent = asyncHandler(async (req, res, next) => {
   let apiFeatures = new ApiFeatures(
-    courseModel.find({ isPublished: false }),
+    courseModel.find({ isPublished: true }),
     req.query
   )
     .fields()
-    .pagination(courseModel.find({ isPublished: false }))
+    .pagination(courseModel.find({ isPublished: true }))
     .search()
     .sort()
     .filter();
